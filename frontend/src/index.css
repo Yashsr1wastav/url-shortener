@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Sora:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #080b14;
+  --bg-card: #0f1623;
+  --bg-card-hover: #161e2e;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --text-primary: #f1f5f9;
+  --text-muted: #64748b;
+  --border: #1e293b;
+  --gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.font-sora { font-family: 'Sora', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-down { animation: slideDown 280ms ease both; }
+
