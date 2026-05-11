@@ -10,7 +10,15 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+function normalizeOrigin(origin) {
+  if (!origin || origin === '*') {
+    return origin || '*';
+  }
+
+  return origin.endsWith('/') ? origin.slice(0, -1) : origin;
+}
+
+app.use(cors({ origin: normalizeOrigin(process.env.CORS_ORIGIN) }));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
