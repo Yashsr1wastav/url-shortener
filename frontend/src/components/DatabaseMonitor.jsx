@@ -16,11 +16,20 @@ export default function DatabaseMonitor() {
       inFlight = true;
       setLoading(true);
       try {
-        const s = await getSystemStats();
-        const q = await getRecentQueries();
+        const [statsResult, queriesResult] = await Promise.allSettled([
+          getSystemStats(),
+          getRecentQueries()
+        ]);
+
         if (!mounted) return;
-        setStats(s);
-        setQueries(q);
+
+        if (statsResult.status === 'fulfilled') {
+          setStats(statsResult.value);
+        }
+
+        if (queriesResult.status === 'fulfilled') {
+          setQueries(queriesResult.value);
+        }
       } catch (err) {
         console.error('db monitor fetch', err);
       } finally {

@@ -18,10 +18,17 @@ function timeAgo(ts) {
 
 router.get('/system/stats', async (req, res) => {
   try {
-    const urlCount = await prisma.url.count();
-    const clickCount = await prisma.click.count();
-    const lastUrl = await prisma.url.findFirst({ orderBy: { createdAt: 'desc' } });
-    const lastClick = await prisma.click.findFirst({ orderBy: { clickedAt: 'desc' } });
+    const [urlCountResult, clickCountResult, lastUrlResult, lastClickResult] = await Promise.allSettled([
+      prisma.url.count(),
+      prisma.click.count(),
+      prisma.url.findFirst({ orderBy: { createdAt: 'desc' } }),
+      prisma.click.findFirst({ orderBy: { clickedAt: 'desc' } })
+    ]);
+
+    const urlCount = urlCountResult.status === 'fulfilled' ? urlCountResult.value : null;
+    const clickCount = clickCountResult.status === 'fulfilled' ? clickCountResult.value : null;
+    const lastUrl = lastUrlResult.status === 'fulfilled' ? lastUrlResult.value : null;
+    const lastClick = lastClickResult.status === 'fulfilled' ? lastClickResult.value : null;
 
     res.json({
       urlCount,
