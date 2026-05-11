@@ -2,6 +2,8 @@ import redis from '../redis/client.js';
 import prisma from '../db/prisma.js';
 import { getCountryFromIp } from '../utils/geoip.js';
 import crypto from 'crypto';
+import { performance } from 'perf_hooks';
+import { logQuery } from '../utils/queryLog.js';
 
 export async function recordClick(code, req) {
   const ip = req.headers['x-forwarded-for'] || req.ip || '';
@@ -12,6 +14,7 @@ export async function recordClick(code, req) {
 
   setImmediate(async () => {
     try {
+      const t0 = performance.now();
       await Promise.all([
         redis.incr(`clicks:total:${code}`),
         redis.sadd(`clicks:unique:${code}`, ipHash),
@@ -19,6 +22,8 @@ export async function recordClick(code, req) {
         redis.incr(`clicks:country:${code}:${country}`),
         redis.incr(`clicks:referrer:${code}:${referrer}`),
       ]);
+      const t1 = performance.now();
+      logQuery({ type: 'INSERT', table: 'clicks', duration: t1 - t0, message: `Click on ${code}` });
     } catch (err) {
       console.error('Analytics error', err);
     }
@@ -26,6 +31,11 @@ export async function recordClick(code, req) {
 }
 
 export async function getAnalytics(code) {
+  const url = await prisma.url.findUnique({
+    where: { code },
+    select: { expiresAt: true, maxClicks: true, totalClicks: true, isActive: true, createdAt: true }
+  });
+
   const today = new Date();
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
@@ -60,6 +70,10 @@ export async function getAnalytics(code) {
   );
 
   return {
+    expiresAt: url?.expiresAt || null,
+    maxClicks: url?.maxClicks || null,
+    totalUrlClicks: url?.totalClicks || 0,
+    isActive: url?.isActive ?? true,
     totalClicks,
     uniqueClicks,
     dailyClicks: last7Days.map((day, i) => ({ date: day, clicks: dailyCounts[i] })),

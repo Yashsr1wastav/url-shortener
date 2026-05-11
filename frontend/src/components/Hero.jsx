@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { shortenUrl } from '../api/client';
 
-export default function Hero({ onShortened }) {
+export default function Hero({ onShortened, onShortenStart, onShortenComplete }) {
   const [originalUrl, setOriginalUrl] = useState('');
   const [alias, setAlias] = useState('');
   const [expiresInDays, setExpiresInDays] = useState(7);
@@ -15,11 +15,17 @@ export default function Hero({ onShortened }) {
     setError(null);
     setLoading(true);
     try {
+      onShortenStart && onShortenStart();
+    } catch (err) {
+      // ignore
+    }
+    try {
       const payload = { originalUrl };
       if (alias) payload.alias = alias;
       if (expiresInDays) payload.expiresInDays = Number(expiresInDays);
       if (maxClicks) payload.maxClicks = Number(maxClicks);
       const res = await shortenUrl(payload);
+      try { onShortenComplete && onShortenComplete(res.code); } catch(e){}
       onShortened(res);
     } catch (err) {
       setError(err?.response?.data?.error || err.message || 'Failed');
@@ -29,54 +35,64 @@ export default function Hero({ onShortened }) {
   };
 
   return (
-    <section className="max-w-3xl mx-auto mt-12">
+    <section className="max-w-5xl">
+      <div className="mb-6 text-left">
+        <h1 className="font-sora text-4xl font-semibold tracking-[-0.03em] text-white sm:text-5xl">
+          Make every <span className="text-[var(--accent-primary)]">link</span> count.
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
+          Production-grade URL shortener and insights dashboard.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
+        <div className="flex flex-col sm:flex-row">
           <input
-            className="w-full p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] focus:outline-none focus:shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+            className="h-12 min-w-0 flex-1 rounded-md rounded-r-none border border-[var(--border)] border-l-0 bg-[var(--bg-elevated)] px-4 text-sm text-white outline-none placeholder:text-[var(--text-muted)] transition-[border-color,border-left-width] duration-150 ease-out focus:border-[var(--accent-primary)] focus:border-l-[3px] sm:rounded-r-none"
             placeholder="Paste a long URL"
             value={originalUrl}
             onChange={e => setOriginalUrl(e.target.value)}
             required
           />
+          <button
+            type="submit"
+            className="mt-2 h-12 rounded-md rounded-l-none bg-[var(--accent-primary)] px-5 text-sm font-semibold text-white transition duration-100 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-0 sm:rounded-l-none"
+            disabled={loading}
+          >
+            {loading ? 'Shortening…' : 'Shorten'}
+          </button>
         </div>
 
         <div>
           <button
             type="button"
-            className="text-sm text-[var(--text-muted)]"
+            className="text-xs font-medium text-[var(--text-muted)] transition hover:text-white"
             onClick={() => setAdvanced(s => !s)}
           >
-            {advanced ? 'Hide advanced' : 'Show advanced options'}
+            {advanced ? 'hide advanced options' : 'show advanced options'}
           </button>
         </div>
 
         {advanced && (
-          <div className="p-4 rounded bg-[var(--bg-card)] border border-[var(--border)] space-y-3">
+          <div className="grid gap-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4 sm:grid-cols-3">
             <div>
-              <label className="text-sm text-[var(--text-muted)]">Custom alias</label>
-              <input value={alias} onChange={e=>setAlias(e.target.value)} className="w-full mt-1 p-2 rounded bg-[transparent] border border-[var(--border)]" placeholder="myalias (3-20 alphanumeric)" />
+              <label className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Custom alias</label>
+              <input value={alias} onChange={e => setAlias(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 text-sm text-white outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)]" placeholder="myalias" />
             </div>
             <div>
-              <label className="text-sm text-[var(--text-muted)]">Expires in (days)</label>
-              <select value={expiresInDays} onChange={e=>setExpiresInDays(e.target.value)} className="w-full mt-1 p-2 rounded bg-[transparent] border border-[var(--border)]">
-                {[1,3,7,14,30,90,365].map(d=> <option key={d} value={d}>{d} days</option>)}
+              <label className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Expires in</label>
+              <select value={expiresInDays} onChange={e => setExpiresInDays(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 text-sm text-white outline-none focus:border-[var(--accent-primary)]">
+                {[1, 3, 7, 14, 30, 90, 365].map(d => <option key={d} value={d}>{d} days</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm text-[var(--text-muted)]">Max clicks</label>
-              <input value={maxClicks} onChange={e=>setMaxClicks(e.target.value)} type="number" min="1" className="w-full mt-1 p-2 rounded bg-[transparent] border border-[var(--border)]" placeholder="e.g. 100" />
+              <label className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Max clicks</label>
+              <input value={maxClicks} onChange={e => setMaxClicks(e.target.value)} type="number" min="1" className="mt-2 h-10 w-full rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 text-sm text-white outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)]" placeholder="e.g. 100" />
             </div>
           </div>
         )}
 
-        <div>
-          <button type="submit" className="px-6 py-3 rounded-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white" disabled={loading}>
-            {loading ? 'Shortening…' : 'Shorten'}
-          </button>
-        </div>
-
-        {error && <div className="text-red-400">{error}</div>}
+        {error && <div className="text-sm text-[var(--accent-red)]">{error}</div>}
       </form>
     </section>
   );

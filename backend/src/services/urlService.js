@@ -1,6 +1,8 @@
 import { generateCode } from '../utils/base62.js';
 import prisma from '../db/prisma.js';
 import redis from '../redis/client.js';
+import { performance } from 'perf_hooks';
+import { logQuery } from '../utils/queryLog.js';
 
 export async function createShortUrl({ originalUrl, alias, expiresInDays, maxClicks }) {
   if (alias) {
@@ -29,9 +31,12 @@ export async function createShortUrl({ originalUrl, alias, expiresInDays, maxCli
     ? new Date(Date.now() + expiresInDays * 86400000)
     : null;
 
+  const t0 = performance.now();
   const url = await prisma.url.create({
     data: { code, originalUrl, alias, expiresAt, maxClicks }
   });
+  const t1 = performance.now();
+  logQuery({ type: 'INSERT', table: 'urls', duration: t1 - t0, message: `${code} created` });
 
   try {
     await redis.setex(
@@ -47,6 +52,7 @@ export async function createShortUrl({ originalUrl, alias, expiresInDays, maxCli
 }
 
 export async function resolveUrl(code) {
+
   const cached = await redis.get(`url:${code}`);
   if (cached) {
     const data = JSON.parse(cached);
@@ -56,7 +62,13 @@ export async function resolveUrl(code) {
     return { originalUrl: data.originalUrl, expiresAt: data.expiresAt, maxClicks: data.maxClicks, totalClicks: data.totalClicks, fromCache: true };
   }
 
+  const t2 = performance.now();
   const url = await prisma.url.findUnique({ where: { code } });
+  const t3 = performance.now();
+  if (url) {
+    logQuery({ type: 'SELECT', table: 'urls', duration: t3 - t2, message: `${code} resolved` });
+  }
+
   if (!url) return null;
 
   if (url.expiresAt && url.expiresAt < new Date()) {

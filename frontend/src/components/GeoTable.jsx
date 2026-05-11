@@ -3,19 +3,33 @@ import React from 'react';
 export default function GeoTable({ countries }) {
   const total = countries.reduce((s, c) => s + (c.clicks || 0), 0) || 1;
   return (
-    <div className="bg-[var(--bg-card)] p-4 rounded border border-[var(--border)]">
-      <h3 className="mb-2 font-medium">Countries</h3>
-      <div className="space-y-2">
-        {countries.map(c => (
-          <div key={c.country} className="flex items-center justify-between">
-            <div className="w-1/3">{c.country}</div>
-            <div className="w-1/3 text-right">{c.clicks}</div>
-            <div className="w-1/3 pl-4">
-              <div className="h-2 bg-[var(--border)] rounded" style={{ width: `${Math.round((c.clicks/total)*100)}%`, background: 'linear-gradient(90deg,var(--accent-primary),var(--accent-secondary))' }} />
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="overflow-hidden rounded-md border border-[var(--border)] bg-[var(--bg-card)]">
+      <div className="border-b border-[var(--border)] px-4 py-3 text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">Countries</div>
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-[var(--border)] text-[10px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
+            <th className="px-4 py-2 text-left font-medium">Country</th>
+            <th className="px-4 py-2 text-right font-medium">Clicks</th>
+            <th className="px-4 py-2 text-left font-medium">Share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {countries.map((c, index) => {
+            const share = Math.max(6, Math.round((c.clicks / total) * 100));
+            return (
+              <tr key={c.country} className={index % 2 === 0 ? 'bg-[rgba(255,255,255,0.02)]' : 'bg-transparent'}>
+                <td className="px-4 py-3 text-white">{c.country}</td>
+                <td className="px-4 py-3 text-right font-tech text-white">{c.clicks}</td>
+                <td className="px-4 py-3">
+                  <div className="h-1.5 w-full bg-[var(--border-subtle)]">
+                    <div className="h-1.5 bg-[var(--accent-primary)] opacity-80" style={{ width: `${share}%` }} />
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

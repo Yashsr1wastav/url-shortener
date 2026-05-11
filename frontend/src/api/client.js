@@ -17,4 +17,19 @@ export async function getAnalytics(code) {
   return res.data;
 }
 
+export async function getSystemStats() {
+  const res = await client.get('/api/system/stats');
+  return res.data;
+}
+
+export async function getRecentQueries() {
+  const res = await client.get('/api/system/recent-queries');
+  return res.data;
+}
+
+export async function checkCache(code) {
+  const res = await client.get(`/api/system/cache/${encodeURIComponent(code)}`);
+  return res.data;
+}
+
 export default client;

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function ResultCard({ result, onViewAnalytics }) {
   const [copied, setCopied] = useState(false);
+  const shortUrl = result.shortUrl || `${window.location.origin}/${result.code}`;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(result.shortUrl);
+      await navigator.clipboard.writeText(shortUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -13,22 +14,48 @@ export default function ResultCard({ result, onViewAnalytics }) {
     }
   };
 
+  useEffect(() => {
+    setCopied(false);
+  }, [result.code]);
+
   return (
-    <div className="mt-6 p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] shadow-lg animate-slide-down">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm text-[var(--text-muted)]">Short URL</div>
-          <div className="text-lg font-medium">{result.shortUrl}</div>
+    <div className="result-fade-up mt-4 w-full max-w-full overflow-hidden rounded-md border border-[var(--border)] border-l-[3px] border-l-[var(--accent-green)] bg-[var(--bg-card)] p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm">
+        <span className="font-medium text-[var(--accent-green)]">✓ Created</span>
+        <span className="text-[var(--text-muted)]">Ready to share and track</span>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="min-w-0">
+          <div className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Short URL</div>
+          <a
+            href={shortUrl}
+            target="_blank"
+            rel="noreferrer"
+            title={shortUrl}
+            className="block truncate font-tech text-base font-medium text-white"
+          >
+            {shortUrl}
+          </a>
         </div>
-        <div className="flex gap-2">
-          <button onClick={handleCopy} className={`px-3 py-1 rounded ${copied ? 'bg-[var(--accent-green)]' : 'bg-[var(--bg-card-hover)]'}`}>
-            {copied ? 'Copied!' : 'Copy'}
+
+        <div className="flex flex-nowrap gap-2">
+          <button
+            onClick={handleCopy}
+            className="inline-flex flex-1 items-center justify-center rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-white transition hover:border-[var(--accent-primary)] hover:bg-[var(--accent-primary)]"
+          >
+            {copied ? 'Copied' : 'Copy'}
           </button>
-          <button onClick={() => onViewAnalytics(result.code)} className="px-3 py-1 rounded bg-[var(--bg-card-hover)]">View Analytics</button>
+          <button
+            onClick={() => onViewAnalytics(result.code)}
+            className="inline-flex flex-1 items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:text-white"
+          >
+            View Analytics →
+          </button>
         </div>
       </div>
 
-      <div className="mt-3 text-sm text-[var(--text-muted)]">
+      <div className="mt-3 text-xs text-[var(--text-muted)]">
         {result.expiresAt ? `Expires: ${new Date(result.expiresAt).toLocaleString()}` : 'No expiry set'}
         {result.maxClicks ? ` • Max clicks: ${result.maxClicks}` : ''}
       </div>
