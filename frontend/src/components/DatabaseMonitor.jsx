@@ -6,10 +6,15 @@ export default function DatabaseMonitor() {
   const [queries, setQueries] = useState([]);
   const [showSchema, setShowSchema] = useState(false);
   const [rowTick, setRowTick] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+    let inFlight = false;
     async function load() {
+      if (inFlight) return;
+      inFlight = true;
+      setLoading(true);
       try {
         const s = await getSystemStats();
         const q = await getRecentQueries();
@@ -18,10 +23,13 @@ export default function DatabaseMonitor() {
         setQueries(q);
       } catch (err) {
         console.error('db monitor fetch', err);
+      } finally {
+        inFlight = false;
+        if (mounted) setLoading(false);
       }
     }
     load();
-    const iv = setInterval(load, 3000);
+    const iv = setInterval(load, 6000);
     return () => { mounted = false; clearInterval(iv); };
   }, []);
 
@@ -32,6 +40,7 @@ export default function DatabaseMonitor() {
   return (
     <section className="rounded-md border border-[var(--border)] bg-[var(--bg-card)] p-4">
       <div className="mb-3 text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">DB ACTIVITY</div>
+      <div className="mb-3 text-[10px] uppercase tracking-[0.1em] text-[var(--text-muted)]">{loading ? 'Refreshing...' : 'Live'}</div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_0.5fr_0.5fr] items-stretch">
         <div>
