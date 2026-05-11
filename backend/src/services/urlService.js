@@ -39,13 +39,17 @@ export async function createShortUrl({ originalUrl, alias, expiresInDays, maxCli
   logQuery({ type: 'INSERT', table: 'urls', duration: t1 - t0, message: `${code} created` });
 
   try {
-    await redis.setex(
-      `url:${code}`,
-      86400,
-      JSON.stringify({ originalUrl, expiresAt, maxClicks, totalClicks: 0 })
-    );
+    await Promise.all([
+      redis.setex(
+        `url:${code}`,
+        86400,
+        JSON.stringify({ originalUrl, expiresAt, maxClicks, totalClicks: 0 })
+      ),
+      redis.incr('system:url_count'),
+      redis.set('system:last_url_time', Date.now())
+    ]);
   } catch (err) {
-    console.error('Redis setex failed', err);
+    console.error('Redis operations failed', err);
   }
 
   return url;

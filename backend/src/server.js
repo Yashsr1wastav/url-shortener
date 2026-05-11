@@ -22,6 +22,8 @@ function normalizeOrigin(origin) {
 app.use(cors({ origin: normalizeOrigin(process.env.CORS_ORIGIN) }));
 app.use(express.json());
 
+app.get('/', (req, res) => res.json({ name: 'linkr API', status: 'ok', version: '1.0' }));
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
 });

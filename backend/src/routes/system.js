@@ -32,16 +32,18 @@ const withTimeout = (promise, ms) => Promise.race([
 
 router.get('/system/stats', async (req, res) => {
   try {
-    const urlCount = await withTimeout(prisma.url.count(), 4000);
-    const clickCount = await withTimeout(prisma.click.count(), 4000);
-    const lastUrl = await withTimeout(prisma.url.findFirst({ orderBy: { createdAt: 'desc' } }), 4000);
-    const lastClick = await withTimeout(prisma.click.findFirst({ orderBy: { clickedAt: 'desc' } }), 4000);
+    const [urlCount, clickCount, lastUrlTime, lastClickTime] = await Promise.all([
+      redis.get('system:url_count'),
+      redis.get('system:click_count'),
+      redis.get('system:last_url_time'),
+      redis.get('system:last_click_time'),
+    ]);
 
     res.json({
-      urlCount,
-      clickCount,
-      lastUrlCreated: lastUrl ? timeAgo(lastUrl.createdAt) : 'never',
-      lastClickRecorded: lastClick ? timeAgo(lastClick.createdAt) : 'never'
+      urlCount: parseInt(urlCount || '0'),
+      clickCount: parseInt(clickCount || '0'),
+      lastUrlCreated: lastUrlTime ? timeAgo(parseInt(lastUrlTime)) : 'never',
+      lastClickRecorded: lastClickTime ? timeAgo(parseInt(lastClickTime)) : 'never'
     });
   } catch (err) {
     console.error('system stats error', err);

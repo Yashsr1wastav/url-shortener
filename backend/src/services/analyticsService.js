@@ -21,6 +21,8 @@ export async function recordClick(code, req) {
         redis.incr(`clicks:daily:${code}:${today}`),
         redis.incr(`clicks:country:${code}:${country}`),
         redis.incr(`clicks:referrer:${code}:${referrer}`),
+        redis.incr('system:click_count'),
+        redis.set('system:last_click_time', Date.now()),
       ]);
       const t1 = performance.now();
       logQuery({ type: 'INSERT', table: 'clicks', duration: t1 - t0, message: `Click on ${code}` });
