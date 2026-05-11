@@ -5,6 +5,7 @@ import shortenRouter from './routes/shorten.js';
 import analyticsRouter from './routes/analytics.js';
 import redirectRouter from './routes/redirect.js';
 import systemRouter from './routes/system.js';
+import prisma from './db/prisma.js';
 
 dotenv.config();
 
@@ -41,4 +42,13 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
+
+  setTimeout(async () => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('Database connection warmed up');
+    } catch (e) {
+      console.error('Warmup failed', e);
+    }
+  }, 2000);
 });

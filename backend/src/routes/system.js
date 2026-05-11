@@ -16,19 +16,26 @@ function timeAgo(ts) {
   return `${h}h ago`;
 }
 
+const defaultStats = {
+  urlCount: 0,
+  clickCount: 0,
+  lastUrlCreated: 'unknown',
+  lastClickRecorded: 'unknown',
+};
+
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Query timeout')), ms)
+  ),
+]);
+
 router.get('/system/stats', async (req, res) => {
   try {
-    const [urlCountResult, clickCountResult, lastUrlResult, lastClickResult] = await Promise.allSettled([
-      prisma.url.count(),
-      prisma.click.count(),
-      prisma.url.findFirst({ orderBy: { createdAt: 'desc' } }),
-      prisma.click.findFirst({ orderBy: { clickedAt: 'desc' } })
-    ]);
-
-    const urlCount = urlCountResult.status === 'fulfilled' ? urlCountResult.value : null;
-    const clickCount = clickCountResult.status === 'fulfilled' ? clickCountResult.value : null;
-    const lastUrl = lastUrlResult.status === 'fulfilled' ? lastUrlResult.value : null;
-    const lastClick = lastClickResult.status === 'fulfilled' ? lastClickResult.value : null;
+    const urlCount = await withTimeout(prisma.url.count(), 4000);
+    const clickCount = await withTimeout(prisma.click.count(), 4000);
+    const lastUrl = await withTimeout(prisma.url.findFirst({ orderBy: { createdAt: 'desc' } }), 4000);
+    const lastClick = await withTimeout(prisma.click.findFirst({ orderBy: { clickedAt: 'desc' } }), 4000);
 
     res.json({
       urlCount,
@@ -38,7 +45,7 @@ router.get('/system/stats', async (req, res) => {
     });
   } catch (err) {
     console.error('system stats error', err);
-    res.status(500).json({ error: 'internal' });
+    res.status(200).json(defaultStats);
   }
 });
 
