@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { shortenUrl } from '../api/client';
 
 export default function Hero({ onShortened, onShortenStart, onShortenComplete }) {
@@ -9,18 +9,52 @@ export default function Hero({ onShortened, onShortenStart, onShortenComplete })
   const [advanced, setAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const loadingMessages = [
+    'Connecting to server...',
+    'Validating URL...',
+    'Generating short code...',
+    'Storing in database...',
+    'Almost done...'
+  ];
+  const [msgIndex, setMsgIndex] = useState(0);
+  const msgInterval = useRef(null);
+  const timeoutWarn = useRef(null);
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (msgInterval.current) clearInterval(msgInterval.current);
+      if (timeoutWarn.current) clearTimeout(timeoutWarn.current);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setShowTimeoutWarning(false);
+    setMsgIndex(0);
+    // start cycling messages every 3s
+    msgInterval.current = setInterval(() => {
+      setMsgIndex(i => (i + 1) % loadingMessages.length);
+    }, 3000);
+    // show timeout warning after 10s
+    timeoutWarn.current = setTimeout(() => {
+      setShowTimeoutWarning(true);
+    }, 10000);
     try {
       onShortenStart && onShortenStart();
     } catch (err) {
       // ignore
     }
     try {
-      const payload = { originalUrl };
+      // auto-prepend https:// if missing
+      let url = originalUrl.trim();
+      if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      const payload = { originalUrl: url };
       if (alias) payload.alias = alias;
       if (expiresInDays) payload.expiresInDays = Number(expiresInDays);
       if (maxClicks) payload.maxClicks = Number(maxClicks);
@@ -31,6 +65,17 @@ export default function Hero({ onShortened, onShortenStart, onShortenComplete })
       setError(err?.response?.data?.error || err.message || 'Failed');
     } finally {
       setLoading(false);
+      // clear intervals/timeouts
+      if (msgInterval.current) {
+        clearInterval(msgInterval.current);
+        msgInterval.current = null;
+      }
+      if (timeoutWarn.current) {
+        clearTimeout(timeoutWarn.current);
+        timeoutWarn.current = null;
+      }
+      setMsgIndex(0);
+      setShowTimeoutWarning(false);
     }
   };
 
@@ -62,6 +107,18 @@ export default function Hero({ onShortened, onShortenStart, onShortenComplete })
             {loading ? 'Shortening…' : 'Shorten'}
           </button>
         </div>
+
+        {loading && (
+          <div className="text-sm text-muted mt-2 font-mono">
+            {'> ' + loadingMessages[msgIndex]}
+          </div>
+        )}
+
+        {loading && showTimeoutWarning && (
+          <div className="text-xs text-yellow-500 mt-1">
+            Server is waking up — this may take up to 30s on first request...
+          </div>
+        )}
 
         <div>
           <button

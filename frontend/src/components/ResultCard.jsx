@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 export default function ResultCard({ result, onViewAnalytics }) {
   const [copied, setCopied] = useState(false);
-  const shortUrl = result.shortUrl || `${window.location.origin}/${result.code}`;
+  // Display the shortUrl exactly as returned from the API
+  const shortUrl = result.shortUrl;
 
   const handleCopy = async () => {
     try {

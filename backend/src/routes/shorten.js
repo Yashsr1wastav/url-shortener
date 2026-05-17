@@ -14,11 +14,19 @@ const bodySchema = z.object({
 
 router.post('/shorten', async (req, res) => {
   try {
-    const parsed = bodySchema.parse(req.body);
+    let { originalUrl, alias, expiresInDays, maxClicks } = req.body || {};
+
+    // Auto-prepend https:// if missing
+    if (originalUrl && !originalUrl.startsWith('http://') && !originalUrl.startsWith('https://')) {
+      originalUrl = 'https://' + originalUrl;
+    }
+
+    const parsed = bodySchema.parse({ originalUrl, alias, expiresInDays, maxClicks });
     const url = await createShortUrl(parsed);
+    const base = process.env.BASE_URL || config.BASE_URL;
     return res.json({
       ...url,
-      shortUrl: `${config.BASE_URL}/${url.code}`
+      shortUrl: `${base}/${url.code}`
     });
   } catch (err) {
     if (err && err.name === 'ZodError') {
