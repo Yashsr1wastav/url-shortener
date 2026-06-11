@@ -5,7 +5,7 @@ export default function ResultCard({ result, onViewAnalytics }) {
   // Display only the short code, but open/copy backend redirect URL to avoid frontend hop.
   const code = result.code;
   const shortBase = import.meta.env.VITE_SHORT_BASE || import.meta.env.VITE_API_URL || window.location.origin;
-  const fullUrl = `${shortBase.replace(/\/$/, '')}/${code}`;
+  const fullUrl = result.redirectUrl || `${shortBase.replace(/\/$/, '')}/${code}`;
 
   const handleCopy = async () => {
     try {
