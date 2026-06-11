@@ -1,14 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
+const prisma = globalThis.prisma ?? new PrismaClient({
   log: ['error'],
 });
 
-prisma.$connect().catch(console.error);
+if (!globalThis.prisma) {
+  globalThis.prisma = prisma;
+}
 
 export default prisma;

@@ -42,15 +42,41 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
+});
 
-  setTimeout(async () => {
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Stop the existing process or change PORT.`);
+    process.exit(1);
+  }
+
+  console.error('Server error', error);
+  process.exit(1);
+});
+
+async function shutdown(signal) {
+  console.log(`Received ${signal}, shutting down gracefully...`);
+
+  server.close(async () => {
     try {
-      await prisma.$queryRaw`SELECT 1`;
-      console.log('Database connection warmed up');
-    } catch (e) {
-      console.error('Warmup failed', e);
+      await prisma.$disconnect();
+    } catch (error) {
+      console.error('Prisma disconnect failed', error);
     }
-  }, 2000);
+    process.exit(0);
+  });
+}
+
+process.once('SIGINT', () => {
+  void shutdown('SIGINT');
+});
+
+process.once('SIGTERM', () => {
+  void shutdown('SIGTERM');
+});
+
+process.once('SIGUSR2', () => {
+  void shutdown('SIGUSR2');
 });
