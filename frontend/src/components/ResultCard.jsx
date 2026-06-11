@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 export default function ResultCard({ result, onViewAnalytics }) {
   const [copied, setCopied] = useState(false);
-  // Display the shortUrl exactly as returned from the API
-  const shortUrl = result.shortUrl;
+  // Backend now returns only the short `code`; compose full URL from frontend origin.
+  const code = result.code;
+  const fullUrl = `${window.location.origin}/${code}`;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(shortUrl);
+      await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -30,13 +31,13 @@ export default function ResultCard({ result, onViewAnalytics }) {
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Short URL</div>
           <a
-            href={shortUrl}
+            href={fullUrl}
             target="_blank"
             rel="noreferrer"
-            title={shortUrl}
+            title={fullUrl}
             className="block truncate font-tech text-base font-medium text-white"
           >
-            {shortUrl}
+            {code}
           </a>
         </div>
 
