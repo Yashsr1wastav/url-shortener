@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 export default function ResultCard({ result, onViewAnalytics }) {
   const [copied, setCopied] = useState(false);
-  // Backend now returns only the short `code`; compose full URL from frontend origin.
+  // Display only the short code, but open/copy backend redirect URL to avoid frontend hop.
   const code = result.code;
-  const fullUrl = `${window.location.origin}/${code}`;
+  const shortBase = import.meta.env.VITE_SHORT_BASE || import.meta.env.VITE_API_URL || window.location.origin;
+  const fullUrl = `${shortBase.replace(/\/$/, '')}/${code}`;
 
   const handleCopy = async () => {
     try {
