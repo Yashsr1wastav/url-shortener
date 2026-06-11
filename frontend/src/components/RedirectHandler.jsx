@@ -15,10 +15,16 @@ export default function RedirectHandler() {
               const data = await res.json();
               if (data.originalUrl) {
                 window.location.replace(data.originalUrl);
+                return;
               }
             }
+            // Fallback for older backend deployments without /api/resolve.
+            // This hits backend redirect route directly: GET /:code -> 301 original URL.
+            window.location.replace(`${apiBase}/${encodeURIComponent(code)}`);
           } catch (err) {
             console.error('Redirect handler error', err);
+            // Network/CORS fallback: try backend redirect endpoint directly.
+            window.location.replace(`${apiBase}/${encodeURIComponent(code)}`);
           }
         })();
       }
