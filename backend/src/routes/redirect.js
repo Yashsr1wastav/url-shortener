@@ -16,10 +16,22 @@ router.get('/:code', async (req, res) => {
     }
 
     const originalUrl = result.originalUrl || result.originalUrl;
+    const ip =
+      req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+      req.headers['x-real-ip'] ||
+      req.socket.remoteAddress ||
+      req.ip;
 
     // record click asynchronously (non-blocking)
     try {
-      recordClick(code, req);
+      const clickReq = {
+        headers: {
+          ...req.headers,
+          'x-forwarded-for': ip,
+        },
+        ip,
+      };
+      recordClick(code, clickReq);
     } catch (e) {
       console.error('recordClick failed', e);
     }

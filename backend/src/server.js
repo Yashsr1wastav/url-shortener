@@ -11,6 +11,7 @@ import prisma from './db/prisma.js';
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', true);
 
 function normalizeOrigin(originStr) {
   if (!originStr || originStr === '*') {
