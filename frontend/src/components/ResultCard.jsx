@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 export default function ResultCard({ result, onViewAnalytics }) {
   const [copied, setCopied] = useState(false);
-  // Display only the short code, but open/copy backend redirect URL to avoid frontend hop.
-  const code = result.code;
-  const shortBase = import.meta.env.VITE_SHORT_BASE || import.meta.env.VITE_API_URL || window.location.origin;
-  const fullUrl = result.redirectUrl || `${shortBase.replace(/\/$/, '')}/${code}`;
+  const shortUrl = result.shortUrl;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(fullUrl);
+      await navigator.clipboard.writeText(shortUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -32,13 +29,13 @@ export default function ResultCard({ result, onViewAnalytics }) {
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">Short URL</div>
           <a
-            href={fullUrl}
+            href={shortUrl}
             target="_blank"
             rel="noreferrer"
-            title={fullUrl}
-            className="block truncate font-tech text-base font-medium text-white"
+            title={shortUrl}
+            className="block truncate font-mono text-lg font-medium text-white"
           >
-            {code}
+            {shortUrl}
           </a>
         </div>
 

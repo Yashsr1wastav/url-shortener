@@ -5,18 +5,27 @@ import shortenRouter from './routes/shorten.js';
 import analyticsRouter from './routes/analytics.js';
 import redirectRouter from './routes/redirect.js';
 import systemRouter from './routes/system.js';
+import resolveRouter from './routes/resolve.js';
 import prisma from './db/prisma.js';
 
 dotenv.config();
 
 const app = express();
 
-function normalizeOrigin(origin) {
-  if (!origin || origin === '*') {
-    return origin || '*';
+function normalizeOrigin(originStr) {
+  if (!originStr || originStr === '*') {
+    return originStr || '*';
   }
-
-  return origin.endsWith('/') ? origin.slice(0, -1) : origin;
+  // Handle comma-separated origins
+  if (originStr.includes(',')) {
+    const origins = originStr.split(',').map(o => {
+      o = o.trim();
+      return o.endsWith('/') ? o.slice(0, -1) : o;
+    });
+    return origins;
+  }
+  // Single origin
+  return originStr.endsWith('/') ? originStr.slice(0, -1) : originStr;
 }
 
 app.use(cors({ origin: normalizeOrigin(process.env.CORS_ORIGIN) }));
@@ -30,6 +39,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api', shortenRouter);
 app.use('/api', analyticsRouter);
+app.use('/api', resolveRouter);
 app.use('/api', systemRouter);
 // mount redirect last to avoid /api conflicts
 app.use('/', redirectRouter);

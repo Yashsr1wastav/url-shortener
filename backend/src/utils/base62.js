@@ -1,6 +1,6 @@
 const CHARS = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-export function generateCode(length = 6) {
+export function generateCode(length = 5) {
   let code = '';
   for (let i = 0; i < length; i++) {
     code += CHARS[Math.floor(Math.random() * CHARS.length)];

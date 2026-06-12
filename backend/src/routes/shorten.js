@@ -1,7 +1,6 @@
 import express from 'express';
 import { z } from 'zod';
 import { createShortUrl } from '../services/urlService.js';
-import config from '../config/index.js';
 
 const router = express.Router();
 
@@ -23,10 +22,19 @@ router.post('/shorten', async (req, res) => {
 
     const parsed = bodySchema.parse({ originalUrl, alias, expiresInDays, maxClicks });
     const url = await createShortUrl(parsed);
-    const base = process.env.BASE_URL || config.BASE_URL;
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const proto = Array.isArray(forwardedProto)
+      ? forwardedProto[0]
+      : (forwardedProto || req.protocol || 'https');
+    const host = req.get('host');
+    const redirectBase = host ? `${proto}://${host}` : '';
+
+    // Return short code + canonical redirectUrl so frontend doesn't need env-specific composition.
     return res.json({
-      ...url,
-      shortUrl: `${base}/${url.code}`
+      code: url.code,
+      redirectUrl: redirectBase ? `${redirectBase}/${url.code}` : null,
+      expiresAt: url.expiresAt || null,
+      maxClicks: url.maxClicks || null
     });
   } catch (err) {
     if (err && err.name === 'ZodError') {

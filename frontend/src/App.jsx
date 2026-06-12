@@ -6,7 +6,6 @@ import SystemSimulation from './components/SystemSimulation'
 import DatabaseMonitor from './components/DatabaseMonitor'
 import HowItWorks from './components/HowItWorks'
 import SystemStatsBar from './components/SystemStatsBar'
-import RedirectHandler from './components/RedirectHandler'
 
 export default function App() {
   const [view, setView] = useState('home'); // 'home' | 'analytics'
@@ -38,7 +37,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] animate-fade-in-page">
       <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
-        <RedirectHandler />
         <header className="flex h-12 items-center justify-between border-b border-[var(--border)] px-0">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-[-0.5px] text-white font-sora">⚡ linkr</span>
