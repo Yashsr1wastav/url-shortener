@@ -1,11 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/index.html"
+      "source": "/api/:path*",
+      "destination": "https://url-shortener-bfr2.onrender.com/api/:path*"
     },
     {
-      "source": "/",
+      "source": "/:code([a-zA-Z0-9]{4,12})",
+      "destination": "https://url-shortener-bfr2.onrender.com/:code"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
