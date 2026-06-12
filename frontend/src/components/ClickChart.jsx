@@ -8,12 +8,12 @@ function formatDateLabel(dateString) {
 
 export default function ClickChart({ data }) {
   return (
-    <div className="h-80 w-full rounded-md border border-[var(--border)] bg-[var(--bg-card)] p-4">
+    <div className="h-[200px] w-full rounded-md border border-[var(--border)] bg-[var(--bg-card)] p-3 sm:h-80 sm:p-4">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-          <XAxis dataKey="date" tickFormatter={formatDateLabel} tick={{ fill: '#a1a1aa', fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: '#a1a1aa', fontSize: 12 }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="date" tickFormatter={formatDateLabel} tick={{ fill: '#a1a1aa', fontSize: 10 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: '#a1a1aa', fontSize: 10 }} axisLine={false} tickLine={false} />
           <Tooltip
             labelFormatter={formatDateLabel}
             contentStyle={{ background: '#0c0c10', border: '1px solid #27272a', borderRadius: 6, color: '#fafafa' }}

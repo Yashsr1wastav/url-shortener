@@ -225,9 +225,9 @@ export default function SystemSimulation({ triggerCount = 0 }) {
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="lg:w-2/3">
-          <div className="flex h-[220px] items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-3" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-            <svg width="100%" height="220" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" className="overflow-visible">
+        <div className="w-full lg:w-2/3">
+          <div className="flex h-[180px] items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-2 sm:h-[220px] sm:p-3" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+            <svg width="100%" height="100%" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" className="overflow-visible">
               <defs>
                 <filter id="nodeShadow" x="-20%" y="-20%" width="140%" height="140%">
                   <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.35" />
@@ -262,7 +262,7 @@ export default function SystemSimulation({ triggerCount = 0 }) {
               <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
               <span className="ml-2 font-tech">simulation.log</span>
             </div>
-            <div ref={logRef} style={{ height: '140px', overflowY: 'auto', padding: '12px', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }} className="font-tech text-[11px] leading-[1.8] text-[var(--text-secondary)]">
+            <div ref={logRef} style={{ height: '100px' }} className="overflow-y-auto rounded-b-[6px] p-3 font-tech text-[10px] leading-[1.7] text-[var(--text-secondary)] sm:h-[140px] sm:text-[11px]">
               {terminalLines.map((line, index) => (
                 <div key={`${line.raw}-${index}`} className="entry-fade-up flex gap-2" style={{ color: line.color }}>
                   <span className="shrink-0 text-[var(--text-muted)]">{line.prefix}</span>
@@ -274,7 +274,7 @@ export default function SystemSimulation({ triggerCount = 0 }) {
           </div>
         </div>
 
-        <div className="lg:w-1/3">
+        <div className="hidden lg:block lg:w-1/3">
           {tab === 'shorten' ? (
             <div className="rounded-md border border-[var(--border)] bg-[var(--bg-card-hover)] p-3">
               <div className="mb-2 text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">Simulation Steps</div>

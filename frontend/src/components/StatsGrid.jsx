@@ -25,7 +25,7 @@ function StatCard({ label, value, tone }) {
 
 export default function StatsGrid({ stats }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
       <StatCard label="Total Clicks" value={stats.totalClicks} tone="text-[var(--accent-primary)]" />
       <StatCard label="Unique Clicks" value={stats.uniqueClicks} tone="text-[var(--accent-secondary)]" />
       <StatCard label="Countries" value={stats.countries?.length || 0} tone="text-[var(--accent-green)]" />

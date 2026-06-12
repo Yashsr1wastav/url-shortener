@@ -33,22 +33,22 @@ export default function ResultCard({ result, onViewAnalytics }) {
             target="_blank"
             rel="noreferrer"
             title={shortUrl}
-            className="block truncate font-mono text-lg font-medium text-white"
+            className="block truncate font-mono text-base font-medium text-white sm:text-lg"
           >
             {shortUrl}
           </a>
         </div>
 
-        <div className="flex flex-nowrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={handleCopy}
-            className="inline-flex flex-1 items-center justify-center rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-white transition hover:border-[var(--accent-primary)] hover:bg-[var(--accent-primary)]"
+            className="inline-flex w-full flex-1 items-center justify-center rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-white transition hover:border-[var(--accent-primary)] hover:bg-[var(--accent-primary)]"
           >
             {copied ? 'Copied' : 'Copy'}
           </button>
           <button
             onClick={() => onViewAnalytics(result.code)}
-            className="inline-flex flex-1 items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:text-white"
+            className="inline-flex w-full flex-1 items-center justify-center rounded-md px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:text-white"
           >
             View Analytics →
           </button>

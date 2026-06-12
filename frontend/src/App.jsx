@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Hero from './components/Hero'
 import ResultCard from './components/ResultCard'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
@@ -6,15 +6,58 @@ import SystemSimulation from './components/SystemSimulation'
 import DatabaseMonitor from './components/DatabaseMonitor'
 import HowItWorks from './components/HowItWorks'
 import SystemStatsBar from './components/SystemStatsBar'
+import MyLinks from './components/MyLinks'
 
 export default function App() {
   const [view, setView] = useState('home'); // 'home' | 'analytics'
   const [result, setResult] = useState(null);
   const [code, setCode] = useState(null);
   const [shortenTrigger, setShortenTrigger] = useState(0);
+  const [myLinks, setMyLinks] = useState([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('myLinks');
+      if (saved) {
+        setMyLinks(JSON.parse(saved));
+      }
+    } catch (err) {
+      console.error('Failed to load saved links', err);
+    }
+
+    const hash = window.location.hash;
+    if (hash.startsWith('#analytics/')) {
+      const analyticsCode = hash.replace('#analytics/', '');
+      setView('analytics');
+      setCode(analyticsCode);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#analytics/')) {
+        const analyticsCode = hash.replace('#analytics/', '');
+        setView('analytics');
+        setCode(analyticsCode);
+        return;
+      }
+
+      setView('home');
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleShortened = (res) => {
     setResult(res);
+    const newLink = { ...res, createdAt: Date.now() };
+    setMyLinks((prev) => {
+      const updated = [newLink, ...prev].slice(0, 20);
+      localStorage.setItem('myLinks', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleShortenStart = () => {
@@ -27,11 +70,22 @@ export default function App() {
 
   const handleViewAnalytics = (c) => {
     setCode(c);
+    window.location.hash = `#analytics/${c}`;
     setView('analytics');
   };
 
   const handleBack = () => {
+    window.location.hash = '';
     setView('home');
+  };
+
+  const handleClearLinks = () => {
+    setMyLinks([]);
+    try {
+      localStorage.removeItem('myLinks');
+    } catch (err) {
+      console.error('Failed to clear saved links', err);
+    }
   };
 
   return (
@@ -52,13 +106,14 @@ export default function App() {
               <SystemStatsBar />
             </div>
 
-            <section className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-              <div className="fade-section delay-50 min-w-0">
+            <section className="mt-8 flex flex-col gap-8 lg:flex-row">
+              <div className="fade-section delay-50 min-w-0 flex-1">
                 <Hero onShortened={handleShortened} onShortenStart={handleShortenStart} onShortenComplete={handleShortenComplete} />
                 {result && <ResultCard result={result} onViewAnalytics={handleViewAnalytics} />}
+                {myLinks.length > 0 && <MyLinks links={myLinks} onViewAnalytics={handleViewAnalytics} onClearAll={handleClearLinks} />}
               </div>
 
-              <div className="fade-section delay-100 min-w-0">
+              <div className="fade-section delay-100 min-w-0 flex-1">
                 <SystemSimulation triggerCount={shortenTrigger} />
               </div>
             </section>

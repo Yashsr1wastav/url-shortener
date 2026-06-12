@@ -47,14 +47,14 @@ export default function DatabaseMonitor() {
   }, [queries]);
 
   return (
-    <section className="rounded-md border border-[var(--border)] bg-[var(--bg-card)] p-4">
+    <section className="rounded-md border border-[var(--border)] bg-[var(--bg-card)] p-4 text-xs sm:text-sm">
       <div className="mb-3 text-xs uppercase tracking-[0.1em] text-[var(--text-muted)]">DB ACTIVITY</div>
       <div className="mb-3 text-[10px] uppercase tracking-[0.1em] text-[var(--text-muted)]">{loading ? 'Refreshing...' : 'Live'}</div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_0.5fr_0.5fr] items-stretch">
+      <div className="grid items-stretch gap-4 lg:grid-cols-[1fr_0.5fr_0.5fr]">
         <div>
           <div className="mb-2 text-[10px] uppercase tracking-[0.12em] text-[var(--text-muted)]">QUERY LOG</div>
-          <div className="max-h-72 overflow-auto border border-[var(--border-subtle)] bg-[var(--bg-primary)] font-tech text-[11px]">
+          <div className="max-h-72 overflow-auto border border-[var(--border-subtle)] bg-[var(--bg-primary)] font-tech text-xs sm:text-[11px]">
             {queries.map((q, i) => {
               const color = q.type === 'INSERT' ? '#22c55e' : q.type === 'SELECT' ? '#4f6ef7' : '#eab308';
               const opColorClass = q.type === 'INSERT' ? 'text-[#22c55e]' : q.type === 'SELECT' ? 'text-[#4f6ef7]' : 'text-[#eab308]';
@@ -70,7 +70,7 @@ export default function DatabaseMonitor() {
         </div>
 
         <div className="flex flex-col">
-          <div className="rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-3 flex-1 flex flex-col justify-between">
+          <div className="flex flex-1 flex-col justify-between rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-3">
             <div>
               <div className="mb-2 flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-[1px] bg-[#4f6ef7]" />
@@ -90,7 +90,7 @@ export default function DatabaseMonitor() {
         </div>
 
         <div className="flex flex-col">
-          <div className="rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-3 flex-1 flex flex-col justify-between">
+          <div className="flex flex-1 flex-col justify-between rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-3">
             <div>
               <div className="mb-2 flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-[1px] bg-[#eab308]" />

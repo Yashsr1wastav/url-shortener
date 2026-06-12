@@ -82,7 +82,7 @@ export default function Hero({ onShortened, onShortenStart, onShortenComplete })
   return (
     <section className="max-w-5xl">
       <div className="mb-6 text-left">
-        <h1 className="font-sora text-4xl font-semibold tracking-[-0.03em] text-white sm:text-5xl">
+        <h1 className="font-sora text-3xl font-semibold tracking-[-0.03em] text-white lg:text-5xl">
           Make every <span className="text-[var(--accent-primary)]">link</span> count.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--text-muted)]">
