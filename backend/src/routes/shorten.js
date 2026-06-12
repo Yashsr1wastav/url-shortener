@@ -22,19 +22,16 @@ router.post('/shorten', async (req, res) => {
 
     const parsed = bodySchema.parse({ originalUrl, alias, expiresInDays, maxClicks });
     const url = await createShortUrl(parsed);
-    const forwardedProto = req.headers['x-forwarded-proto'];
-    const proto = Array.isArray(forwardedProto)
-      ? forwardedProto[0]
-      : (forwardedProto || req.protocol || 'https');
-    const host = req.get('host');
-    const redirectBase = host ? `${proto}://${host}` : '';
+    const baseUrl = process.env.BASE_URL?.replace(/\/$/, '');
 
-    // Return short code + canonical redirectUrl so frontend doesn't need env-specific composition.
+    // Return the full canonical short URL from the backend environment.
     return res.json({
       code: url.code,
-      redirectUrl: redirectBase ? `${redirectBase}/${url.code}` : null,
-      expiresAt: url.expiresAt || null,
-      maxClicks: url.maxClicks || null
+      shortUrl: baseUrl ? `${baseUrl}/${url.code}` : null,
+      originalUrl: url.originalUrl,
+      expiresAt: url.expiresAt,
+      maxClicks: url.maxClicks,
+      createdAt: url.createdAt
     });
   } catch (err) {
     if (err && err.name === 'ZodError') {
